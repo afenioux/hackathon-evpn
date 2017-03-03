@@ -1,16 +1,18 @@
- # Hackathon Juniper Automation
+# Hackathon Juniper Automation
 
  Theses ansibles playbooks will provision a network with ISIS/MPLS and EVPN
+ 
 
+ 
  ```
-"ansible-playbook" pb_armageddon.yml to remove all the configuration from the routers
-"ansible-playbook" playbooks/pb_deploy.yml to configure all the setup
-"ansible-playbook" playbooks/pb_checkall.yml" to check interface status, ISIS adjacency, BGP sessions states and routes.
+"ansible-playbook pb_armageddon.yml" : remove all the configuration from the routers
+"ansible-playbook playbooks/pb_deploy.yml" : configure all the setup
+"ansible-playbook playbooks/pb_checkall.yml" : check interface status, ISIS adjacency, BGP sessions states and routes.
  ```
 
 ---
 Network topology
-
+ ```
 addressing :
 192.168.1.0/24  Backbone
 10.X.Y.Z Loopback
@@ -25,14 +27,14 @@ PE1        10.2.1.1
 PE2        10.2.2.1 
 PE3        10.2.3.1 
 PE4        10.2.4.1 
-
+ ```
 - - - 
 ## Ansible
-documentation : https://github.com/ksator/ansible-training-for-junos-automation
-rcp commands : https://github.com/ksator/python-training-for-network-engineers/blob/master/rpc-netconf-lxml-ncclient/rpc.md
-exemples : https://github.com/JNPRAutomate/ansible-junos-examples et https://github.com/JNPRAutomate/ansible-junos-evpn-vxlan
-list of modules Junos by Ansible https://docs.ansible.com/ansible/list_of_network_modules.html#junos
-list of modules Junos by Juniper http://junos-ansible-modules.readthedocs.io/en/1.4.0/
+* documentation : https://github.com/ksator/ansible-training-for-junos-automation
+* rcp commands : https://github.com/ksator/python-training-for-network-engineers/blob/master/rpc-netconf-lxml-ncclient/rpc.md
+* examples : https://github.com/JNPRAutomate/ansible-junos-examples et https://github.com/JNPRAutomate/ansible-junos-evpn-vxlan
+* list of modules Junos by Ansible https://docs.ansible.com/ansible/list_of_network_modules.html#junos
+* list of modules Junos by Juniper http://junos-ansible-modules.readthedocs.io/en/1.4.0/
 
 ### Installation
 on the serveur ansible :
@@ -73,16 +75,15 @@ roles/$ROLE/meta/main.yml : list of other roles to run
 roles/$ROLE/handler/main.yml : to run via "notify"
 ```
 
-Création d'un role from scratch :
+Create a role from scratch :
+```
 cd ansible-lab/roles
 ansible-galaxy init $ROLE
+```
 
 ###Execution
-normal execution
+regular execution
 ```ansible-playbook playbook.yml```
-
-Voir les Hosts qui seraient affectés par ce playbook (sans lancer les tasks):
-```ansible-playbook playbook.yml --list-hosts```
 
 run a playbook with arguments :
 ```ansible-playbook playbook.yml -e "arg1=foo port=['80']```
