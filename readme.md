@@ -106,11 +106,10 @@ run task with only the specific tag and show difference (if any)
 - - - 
 #Python / pyEz
 
-prise en main : https://stebe.info/2016/11/introduction-junos-pyez/
-Doc : https://github.com/Juniper/py-junos-eznc#documentation
-Exemples : https://github.com/ksator/python-training-for-network-engineers
+* warm-up : https://stebe.info/2016/11/introduction-junos-pyez/
+* Doc : https://github.com/Juniper/py-junos-eznc#documentation
+* Examples : https://github.com/ksator/python-training-for-network-engineers
 
 
-Installation
-PyEZ :
-pip install junos-eznc
+##Installation
+```pip install junos-eznc```
