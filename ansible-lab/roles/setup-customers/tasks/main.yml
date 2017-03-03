@@ -1,0 +1,16 @@
+---
+- name: generating customers configuration
+  template:
+    src: config.j2
+    dest: "/tmp/render/config_customer_{{ inventory_hostname }}.conf"
+  tags:
+    - templating-ce
+
+- name: pushing customers configuration
+  junos_config:
+    src: "/tmp/render/config_customer_{{ inventory_hostname }}.conf"
+    src_format: text
+    comment: "Customers configured by Ansible"
+    provider: "{{ credentials }}"
+  tags:
+    - rollout-ce

@@ -1,0 +1,50 @@
+{% if ethernet_lag_count is defined %}
+chassis {
+    aggregated-devices {
+        ethernet {
+            device-count {{ ethernet_lag_count }};
+        }
+    }
+}
+{% endif %}
+{% if interfaces is defined %}
+interfaces {
+{% for interface in interfaces %}
+    {{ interface.name }} {
+        description {{ interface.description }};
+{% if interface.gigether_options is defined %}
+        gigether-options {
+            {{ interface.gigether_options }};
+        }
+{% endif %}
+{% if interface.vlan_tagging_type is defined %}
+        {{ interface.vlan_tagging_type }};
+{% endif %}
+{% if interface.family is defined %}
+        unit 0 {
+            family {{ interface.family.type }} {
+                interface-mode {{ interface.family.interface_mode }};
+                vlan-id-list {{ interface.family.vlan_id_list }};
+            }
+        }
+{% endif %}
+    }
+{% endfor %}
+}
+{% endif %}
+{% if routing_options is defined %}
+routing-options {
+    static {
+        route {{ routing_options.static_route.route }} next-hop {{ routing_options.static_route.next_hop }};
+    }
+}
+{% endif %}
+{% if bridge_domains is defined %}
+bridge-domains {
+{% for bridge_domain in bridge_domains %}
+    {{ bridge_domain.name }} {
+        vlan-id {{ bridge_domain.vlan_id }};
+    }
+{% endfor %}
+}
+{% endif %}

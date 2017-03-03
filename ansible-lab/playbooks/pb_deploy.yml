@@ -1,6 +1,7 @@
 ---
-- name: configuration setup
+- name: configuration setup (p and pe routers)
   hosts: p,pe
+  tags: ['backbone']
   connection: local
   gather_facts: no
   vars:
@@ -14,3 +15,18 @@
     - role: ../roles/setup-backbone
     - role: ../roles/setup-bgp
     - role: ../roles/setup-evpn
+
+- name: configuration setup (ce devices)
+  hosts: ce
+  tags: ['customers']
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - role: ../roles/post-install
+    - role: ../roles/setup-customers
