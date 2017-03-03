@@ -1,0 +1,9 @@
+---
+snapcheck_isis:
+- command : show isis adjacency
+- iterate: 
+    xpath: '//isis-adjacency'
+    tests:
+      - is-equal: adjacency-state, Up
+        err: "ISIS state: <{{post['adjacency-state']}}> on <{{post['system-name']}}>"
+        info: "ISIS state: <{{post['adjacency-state']}}> on <{{post['system-name']}}>"

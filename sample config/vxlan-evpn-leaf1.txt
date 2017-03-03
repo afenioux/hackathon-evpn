@@ -1,0 +1,255 @@
+system {
+    host-name leaf1;
+    root-authentication {
+        encrypted-password ""
+    }
+    login {
+        user administrator {
+            uid 2001;
+            class super-user;
+            }
+        }
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+}
+interfaces {
+    xe-0/0/0 {
+        description "to spine2-xe-0/0/0";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.3/31;
+            }
+        }
+    }
+    xe-0/0/1 {
+        description "to ce2-ge-0/0/0";
+        flexible-vlan-tagging;
+        unit 10 {
+            vlan-id 10;
+        }
+        unit 12 {
+            vlan-id 12;
+        }
+    }
+    xe-0/0/2 {
+        description "to server1-eth1";
+        flexible-vlan-tagging;
+        unit 10 {
+            vlan-id 10;
+        }
+        unit 11 {
+            vlan-id 11;
+        }
+    }
+    xe-0/0/3 {
+        description "to spine1-xe-0/0/3";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.1/31;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 100.0.0.21/32;
+            }
+        }
+    }
+}
+routing-options {
+    router-id 100.0.0.21;
+    forwarding-table {
+        export pfe-ecmp;
+    }
+}
+protocols {
+    bgp {
+        log-updown;
+        graceful-restart;
+        group overlay-evpn {
+            type internal;
+            local-address 100.0.0.21;
+            import OVERLAY-IN;
+            family evpn {
+                signaling;
+            }
+            local-as 65200;
+            bfd-liveness-detection {
+                minimum-interval 350;
+                multiplier 3;
+                session-mode automatic;
+            }
+            multipath;
+            neighbor 100.0.0.11;
+            neighbor 100.0.0.12;
+        }
+        group underlay-ipfabric {
+            type external;
+            mtu-discovery;
+            import bgp-ipclos-in;
+            export bgp-ipclos-out;
+            local-as 65031;
+            bfd-liveness-detection {
+                minimum-interval 350;
+                multiplier 3;
+                session-mode automatic;
+            }
+            multipath multiple-as;
+            neighbor 172.16.0.4 {
+                peer-as 65022;
+            }
+            neighbor 172.16.0.2 {
+                peer-as 65021;
+            }
+        }
+    }
+    evpn {
+        encapsulation vxlan;
+        extended-vni-list [ 10010 10011 10012 ];
+        multicast-mode ingress-replication;
+        vni-options {
+            vni 10010 {
+                vrf-target export target:1:10010;
+            }
+            vni 10011 {
+                vrf-target export target:1:10011;
+            }
+            vni 10012 {
+                vrf-target export target:1:10012;
+            }
+        }
+    }
+    lldp {
+        interface all;
+    }
+}
+policy-options {
+    policy-statement LEAF-IN {
+        term import_leaf_esi {
+            from community comm-leaf_esi;
+            then accept;
+        }
+        term import_vni10010 {
+            from community com10010;
+            then accept;
+        }
+        term import_vni10011 {
+            from community com10011;
+            then accept;
+        }
+        term import_vni10012 {
+            from community com10012;
+            then accept;
+        }
+        term default {
+            then reject;
+        }
+    }
+    policy-statement OVERLAY-IN {
+        term reject-remote-gw {
+            from {
+                family evpn;
+                next-hop [ 100.0.0.13 100.0.0.14 ];
+                nlri-route-type [ 1 2 ];
+            }
+            then reject;
+        }
+        term accept-all {
+            then accept;
+        }
+    }
+    policy-statement bgp-ipclos-in {
+        term loopbacks {
+            from {
+                route-filter 100.0.0.0/16 orlonger;
+            }
+            then accept;
+        }
+    }
+    policy-statement bgp-ipclos-out {
+        term loopback {
+            from {
+                protocol direct;
+                route-filter 100.0.0.21/32 orlonger;
+            }
+            then {
+                community add MYCOMMUNITY;
+                next-hop self;
+                accept;
+            }
+        }
+        term as-path {
+            from {
+                as-path asPathLength2;
+                community MYCOMMUNITY;
+            }
+            then reject;
+        }
+        term reject {
+            then reject;
+        }
+    }
+    policy-statement pfe-ecmp {
+        then {
+            load-balance per-packet;
+        }
+    }
+    community MYCOMMUNITY members target:12345:111;
+    community com10010 members target:1:10010;
+    community com10011 members target:1:10011;
+    community com10012 members target:1:10012;
+    community comm-leaf_esi members target:9999:9999;
+    as-path asPathLength2 ".{2,}";
+}
+switch-options {
+    vtep-source-interface lo0.0;
+    route-distinguisher 100.0.0.21:1;
+    vrf-import LEAF-IN;
+    vrf-target target:9999:9999;
+}
+vlans {
+    bd10010 {
+        interface xe-0/0/2.10;
+        interface xe-0/0/1.10;
+        vxlan {
+            vni 10010;
+            ingress-node-replication;
+        }
+    }
+    bd10011 {
+        interface xe-0/0/2.11;
+        vxlan {
+            vni 10011;
+            ingress-node-replication;
+        }
+    }
+    bd10012 {
+        interface xe-0/0/1.12;
+        vxlan {
+            vni 10012;
+            ingress-node-replication;
+        }
+    }
+}

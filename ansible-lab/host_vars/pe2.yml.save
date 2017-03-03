@@ -1,0 +1,35 @@
+---
+hostname: team2-pe2
+management_ip: 192.168.122.34/24
+
+interfaces_BB:
+    - name: ge-0/0/0
+      description: ---- VERS P1 ----
+      ip: 192.168.124.3
+      mask: 31
+      metric: 1
+      peer_name: P1
+      peer_port: ge-0/0/1peer_name: P1
+      peer_port: ge-0/0/1
+
+    - name: ge-0/0/1
+      description: ---- VERS PE1 ----
+      ip: 192.168.124.9
+      mask: 31
+      metric: 10
+
+    - name: ge-0/0/2
+      description: ---- VERS PE3 ----
+      ip: 192.168.124.10
+      mask: 31
+      metric: 10
+host:
+    ip_mgmt: 10.2.2.1
+    ip_services: 10.2.2.2
+    description: ---- ADMINISTRATION ET SERVICES ----
+    mask: 32
+    iso: 49.0001.0000.0000.0034.00
+
+
+bgp:
+    neighbors: [ 10.1.1.2 ]

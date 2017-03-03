@@ -1,0 +1,36 @@
+---
+loopback_interface: lo0
+
+bgp:
+    neighbors: [ 10.1.1.1 ]
+
+irb_interface:
+  units:
+    - id: 100
+      mac_address: 0c:81:45:37:06:15
+      ip_address: 100.1.1.1/24
+    - id: 200
+      mac_address: fe:ef:02:26:22:10
+      ip_address: 200.1.1.1/24
+    - id: 201
+      mac_address: 30:ca:a9:f9:bc:19
+      ip_address: 201.1.1.1/24
+
+routing_instances:
+  - id: 1000
+    description: EVPN for Hackamation
+    type: virtual-switch
+    extended_vlan_list: "[ 100 200-201 ]"
+    default_gateway: do-not-advertise
+    interfaces:
+      - ge-0/0/3.4000
+    bridge_domains:
+      - name: VLAN-100
+        vlan_id: 100
+        routing_interface: irb.100
+      - name: VLAN-200
+        vlan_id: 200
+        routing_interface: irb.200
+      - name: VLAN-201
+        vlan_id: 201
+        routing_interface: irb.201

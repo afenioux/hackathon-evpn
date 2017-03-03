@@ -1,0 +1,306 @@
+version 15.1F6.9;
+system {
+    host-name PE1;
+    root-authentication {
+        encrypted-password ""
+    login {
+        user administrator {
+            uid 2001;
+            class super-user;
+            }
+        }
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+}
+chassis {
+    aggregated-devices {
+        ethernet {
+            device-count 1;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description to-P1-ge-0/0/0;
+        unit 0 {
+            family inet {
+                address 10.0.0.8/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/1 {
+        description to-PE2-ge-0/0/1;
+        unit 0 {
+            family inet {
+                address 10.0.0.0/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/2 {
+        description to-PE3-ge-0/0/2;
+        unit 0 {
+            family inet {
+                address 10.0.0.7/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/3 {
+        description to-CE1-ge-0/0/3;
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        esi {
+            00:22:22:22:22:22:22:22:22:22;
+            all-active;
+        }
+        unit 100 {
+            encapsulation vlan-bridge;
+            vlan-id 100;
+            family bridge;
+        }
+        unit 200 {
+            family bridge {
+                interface-mode trunk;
+                vlan-id-list [ 200 201 ];
+            }
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 192.168.122.32/24;
+            }
+        }
+    }
+    irb {
+        unit 100 {
+            family inet {
+                address 100.1.1.1/24;
+            }
+            mac 00:00:00:01:01:01;
+        }
+        unit 200 {
+            family inet {
+                address 200.1.1.1/24;
+            }
+            mac 00:00:00:01:01:02;
+        }
+        unit 201 {
+            family inet {
+                address 201.1.1.1/24;
+            }
+            mac 00:00:00:01:01:03;
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 1.1.1.1/32;
+            }
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 192.168.122.1;
+    }
+    router-id 1.1.1.1;
+    autonomous-system 65000;
+    forwarding-table {
+        export lb;
+    }
+}
+protocols {
+    rsvp {
+        interface ge-0/0/2.0;
+        interface ge-0/0/0.0;
+        interface ge-0/0/1.0;
+    }
+    mpls {
+        label-switched-path from-PE1-to-PE2-EVPN1 {
+            from 1.1.1.1;
+            to 1.1.1.2;
+            primary path-PE1-to-PE2-EVPN1;
+        }
+        label-switched-path from-PE1-to-PE3-EVPN1 {
+            from 1.1.1.1;
+            to 1.1.1.4;
+            primary path-PE1-to-PE3-EVPN1;
+        }
+        label-switched-path from-PE1-to-PE4 {
+            from 1.1.1.1;
+            to 1.1.1.4;
+        }
+        label-switched-path from-PE1-to-PE2-EVPN2 {
+            from 1.1.1.1;
+            to 1.1.1.2;
+            primary path-PE1-to-PE2-EVPN2;
+        }
+        label-switched-path from-PE1-to-PE3-EVPN2 {
+            from 1.1.1.1;
+            to 1.1.1.3;
+            primary path-PE1-to-PE3-EVPN2;
+        }
+        path path-PE1-to-PE2-EVPN1 {
+            1.1.1.2 strict;
+        }
+        path path-PE1-to-PE3-EVPN1 {
+            1.1.1.2 strict;
+            1.1.1.3 strict;
+        }
+        path path-PE1-to-PE2-EVPN2 {
+            1.1.1.10 strict;
+            1.1.1.2 strict;
+        }
+        path path-PE1-to-PE3-EVPN2 {
+            1.1.1.10 strict;
+            1.1.1.3 strict;
+        }
+        interface ge-0/0/2.0;
+        interface ge-0/0/0.0;
+        interface ge-0/0/1.0;
+    }
+    bgp {
+        group internal {
+            type internal;
+            local-address 1.1.1.1;
+            family inet-vpn {
+                any;
+            }
+            family evpn {
+                signaling;
+            }
+            multipath;
+            neighbor 1.1.1.10 {
+                inactive: bfd-liveness-detection {
+                    minimum-interval 1000;
+                    multiplier 3;
+                }
+            }
+        }
+    }
+    ospf {
+        traffic-engineering;
+        area 0.0.0.0 {
+            interface lo0.0 {
+                passive;
+            }
+            interface ge-0/0/1.0 {
+                interface-type p2p;
+                metric 10;
+            }
+            interface ge-0/0/0.0 {
+                interface-type p2p;
+            }
+            interface ge-0/0/2.0 {
+                interface-type p2p;
+                metric 10;
+            }
+        }
+    }
+    ldp {
+        inactive: preference 6;
+        interface all;
+    }
+    lacp {
+        traceoptions {
+            file lacp;
+            flag all;
+        }
+    }
+    lldp {
+        interface all;
+    }
+}
+policy-options {
+    policy-statement EVPN-policy {
+        term 1 {
+            from {
+                rib mpls.0;
+                community EVPN1-community;
+            }
+            then {
+                install-nexthop lsp [ from-PE1-to-PE3-EVPN1 from-PE1-to-PE4-EVPN1 ];
+                load-balance per-packet;
+                accept;
+            }
+        }
+        term 2 {
+            from {
+                rib mpls.0;
+                community EVPN2-community;
+            }
+            then {
+                install-nexthop lsp [ from-PE1-to-PE3-EVPN2 from-PE1-to-PE4-EVPN2 ];
+                load-balance per-packet;
+                accept;
+            }
+        }
+        term 3 {
+            then accept;
+        }
+    }
+    policy-statement lb {
+        then {
+            load-balance per-packet;
+        }
+    }
+    community EVPN1-community members target:65000:1;
+    community EVPN2-community members target:65000:2;
+}
+routing-instances {
+    EVPN-1 {
+        instance-type evpn;
+        vlan-id 100;
+        interface ge-0/0/3.100;
+        routing-interface irb.100;
+        route-distinguisher 1.1.1.1:1;
+        vrf-target target:65000:1;
+        protocols {
+            evpn {
+                default-gateway do-not-advertise;
+            }
+        }
+    }
+    EVPN-2 {
+        instance-type virtual-switch;
+        interface ge-0/0/3.200;
+        route-distinguisher 1.1.1.1:2;
+        vrf-target target:65000:2;
+        protocols {
+            evpn {
+                extended-vlan-list 200-201;
+                default-gateway advertise;
+            }
+        }
+        bridge-domains {
+            V200 {
+                vlan-id 200;
+                routing-interface irb.200;
+            }
+            V201 {
+                vlan-id 201;
+                routing-interface irb.201;
+            }
+        }
+    }
+}

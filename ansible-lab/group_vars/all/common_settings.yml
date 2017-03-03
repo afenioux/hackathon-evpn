@@ -1,0 +1,25 @@
+---
+root_password: "$5$"
+login_message: vMX ansible LAB
+time_zone: Europe/Paris
+name_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+ntp_servers:
+  - 172.17.28.5
+login:
+  message: vMX ansible LAB
+  users:
+    - name: wistar
+      uid: 2000
+      class: super-user
+      authentication:
+        encrypted_password: "$5$"
+        ssh_rsa: "ssh-rsa AAA"
+    - name: netconf
+      uid: 2001
+      class: super-user
+      authentication:
+        encrypted_password: "$5$"
+
+bgp_asn: 65042

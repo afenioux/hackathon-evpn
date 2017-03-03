@@ -1,0 +1,22 @@
+---
+- name: checks
+  hosts: p,pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+    - name: "Check LDP sessions from P/PE (core/junos_command)"
+      junos_command:
+        commands:
+          - "show ldp neighbor {{ item }}"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['ldp-neighbor-information']['ldp-neighbor']['ldp-remaining-time'] gt 1"
+      with_items: "{{ ldp.neighbor }}"

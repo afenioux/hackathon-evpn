@@ -1,0 +1,51 @@
+---
+hostname: team2-pe1
+management_ip: 192.168.122.32/24;
+
+interfaces_BB:
+    - name: ge-0/0/0
+      description: ---- VERS P1 ----
+      ip: 192.168.124.1
+      mask: 31
+      metric: 1
+      peer_name: P1
+      peer_port: ge-0/0/0
+
+    - name: ge-0/0/1
+      description: ---- VERS PE2 ----
+      ip: 192.168.124.8
+      mask: 31
+      metric: 10
+      peer_name: PE2
+      peer_port: ge-0/0/1
+
+    - name: ge-0/0/2
+      description: ---- VERS PE4 ----
+      ip: 192.168.124.15
+      mask: 31
+      metric: 10
+      peer_name: PE4
+      peer_port: ge-0/0/2
+host:
+    ip_loopback: 10.2.1.1
+    description: ---- ADMINISTRATION ET SERVICES ----
+    mask: 32
+    iso: 49.0001.0000.0000.0032.00
+
+ldp:
+    neighbor: [ 192.168.124.0, 192.168.124.9, 192.168.124.14 ]
+
+evpn_interfaces:
+  - name: ge-0/0/3
+    description: "---- VERS CE ----"
+    vlan_tagging: flexible-vlan-tagging
+    encapsulation: flexible-ethernet-services
+    esi:
+      id: 00:22:22:22:22:22:22:22:22:22
+      mode: all-active
+    units:
+      - id: 4000
+        family:
+          type: bridge
+          interface_mode: trunk
+          vlan_id_list: "[ 100 200 201 ]"

@@ -1,0 +1,27 @@
+---
+- name: checks
+  hosts: p,pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+    - name: "Check ISIS Peer from P/PE"
+      junos_jsnapy:
+        host: "{{ ansible_host }}"
+        user: "{{ ansible_user }}"
+        passwd: "{{ ansible_pass }}"
+        action: "snapcheck"
+        test_files: ../jsnapy/isis.yml
+      register: jsnapy_isis
+
+    - name: debug
+      debug:
+        msg: "{{jsnapy_isis}}"
+      when: jsnapy_isis.passPercentage != 100

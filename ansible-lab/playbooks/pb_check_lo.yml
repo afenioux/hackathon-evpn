@@ -1,0 +1,64 @@
+---
+- name: checks
+  hosts: pe 
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+
+##################################################################
+## Check Connectivity between Overlay peers
+##    Ping are crafted with source and dest IP and TTL one to make
+##    sure they don't get routed on the fabric
+##################################################################
+    - name: "Check connectivity between loopbacks from PE"
+      with_items: "{{ bgp.neighbors }}"
+      junos_ping:
+        host: "{{ ansible_ssh_host }}"
+        port: "{{ netconf_port }}"
+        user: "{{ ansible_user }}"
+        passwd: "{{ ansible_pass }}"
+        dest_ip: "{{ item }}"
+        source_ip: "{{ host.ip_loopback }}"
+        rapid: True
+        count: 2
+        ttl: 1
+
+- name: checks from P
+  hosts: p
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+
+##################################################################
+## Check Connectivity between Overlay peers
+##    Ping are crafted with source and dest IP and TTL one to make
+##    sure they don't get routed on the fabric
+##################################################################
+    - name: "Check connectivity between loopbacks from P"
+      with_items: "{{ bgp.rr_bgp }}"
+      junos_ping:
+        host: "{{ ansible_ssh_host }}"
+        port: "{{ netconf_port }}"
+        user: "{{ ansible_user }}"
+        passwd: "{{ ansible_pass }}"
+        dest_ip: "{{ item }}"
+        source_ip: "{{ host.ip_loopback }}"
+        rapid: True
+        count: 2
+        ttl: 1

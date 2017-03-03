@@ -1,0 +1,68 @@
+---
+- name: checks
+  hosts: pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+    - name: "Check BGP Peer are up from PE (core/junos_command)"
+      junos_command:
+        commands:
+          - "show bgp neighbor {{ item }}"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['bgp-information']['bgp-peer']['peer-state'] eq Established"
+      with_items: "{{ bgp.neighbors }}"
+
+    - name: "Check active EVPN routes from PE (core/junos_command)"
+      junos_command:
+        commands:
+          - "show bgp neighbor {{ item }}"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['bgp-information']['bgp-peer']['bgp-rib'][1]['active-prefix-count']|int gt 0"
+      with_items: "{{ bgp.neighbors }}"
+      register: bgp_pe
+
+    - debug: var=bgp_pe.results[0].stdout[0]['bgp-information']['bgp-peer']['bgp-rib'][1]['active-prefix-count']
+
+
+- name: checks
+  hosts: p
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+    - name: "Check BGP Peer is up from P (core/junos_command)"
+      junos_command:
+        commands:
+          - "show bgp neighbor {{ item }}"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['bgp-information']['bgp-peer']['peer-state'] eq Established"
+      with_items: "{{ bgp.rr_bgp }}"
+
+    - name: "Check EVPN routes in the bgp.evpn.0 table from P (core/junos_command)"
+      junos_command:
+        commands:
+          - "show route table bgp.evpn.0"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['route-information']['route-table']['active-route-count']|int gt 10"
+      register: bgp_p
+
+    - debug: var=bgp_p.stdout[0]['route-information']['route-table']['active-route-count']

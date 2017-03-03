@@ -1,0 +1,66 @@
+interfaces {
+{% for interface in interfaces_BB %}
+    {{ interface.name }} {
+        description "---- VERS {{ interface.peer_name }} ( {{interface.peer_port}} ) ----";
+        unit 0 {
+            family inet {
+                address {{ interface.ip }}/{{ interface.mask }};
+            }
+            family iso;
+            family mpls;
+        }
+    }
+{% endfor %}
+    {{ loopback_interface }} {
+        description "{{ host.description }}";
+        unit 0 {
+            family inet {
+                address {{ host.ip_loopback }}/{{ host.mask }};
+            }
+            family iso {
+                address {{ host.iso }};
+            }
+            family mpls;
+        }    
+    }
+}
+
+protocols {   
+    isis {
+        level 1 wide-metrics-only;
+        level 2 disable;
+{% for interface in interfaces_BB %}
+        interface {{ interface.name }} {
+            point-to-point;
+            bfd-liveness-detection {
+                minimum-interval 250;
+                minimum-receive-interval 250;
+                multiplier 3;
+            }
+            level 1 {
+                metric {{ interface.metric }};
+                hello-interval 10;
+                hold-time 41;
+            }
+        }
+{% endfor %}
+	interface {{ loopback_interface }} {
+            passive;
+	}
+    }
+    ldp {
+        track-igp-metric;
+{% for interface in interfaces_BB %}
+        interface {{ interface.name }};
+{% endfor %}
+        interface {{ loopback_interface }};
+    }
+    lldp {
+        interface all;
+    }
+    mpls {
+{% for interface in interfaces_BB %}
+        interface {{ interface.name }};
+{% endfor %}
+    }
+}

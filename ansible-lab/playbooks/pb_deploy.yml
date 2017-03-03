@@ -1,0 +1,16 @@
+---
+- name: configuration setup
+  hosts: p,pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - role: ../roles/post-install
+    - role: ../roles/setup-backbone
+    - role: ../roles/setup-bgp
+    - role: ../roles/setup-evpn

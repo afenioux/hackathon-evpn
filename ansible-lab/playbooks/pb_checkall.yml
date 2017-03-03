@@ -1,0 +1,7 @@
+---
+
+- include: pb_check_int.yml
+- include: pb_check_lo.yml
+- include: pb_check_isis.yml
+- include: pb_check_ldp.yml
+- include: pb_check_bgp.yml

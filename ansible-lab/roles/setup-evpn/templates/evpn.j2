@@ -1,0 +1,75 @@
+{% if evpn_interfaces is defined %}
+interfaces {
+{% for interface in evpn_interfaces %}
+    {{ interface.name }} {
+        description "{{ interface.description }}";
+{% if interface.vlan_tagging is defined %}
+        {{ interface.vlan_tagging }};
+{% endif %}
+        encapsulation {{ interface.encapsulation }};
+{% if interface.esi is defined %}
+        esi {
+            {{ interface.esi.id }};
+            {{ interface.esi.mode }};
+        }
+{% endif %}
+{% for unit in interface.units %}
+        unit {{ unit.id }} {
+            family {{ unit.family.type }} {
+	    	interface-mode {{ unit.family.interface_mode }};
+		vlan-id-list {{ unit.family.vlan_id_list }};
+            }
+        }
+{% endfor %}
+    }
+{% endfor %}
+{% if irb_interface is defined %}
+    irb {
+{% for unit in irb_interface.units %}
+        unit {{ unit.id }} {
+            mac {{ unit.mac_address }};
+            family inet {
+                address {{ unit.ip_address }};
+            }
+        }
+{% endfor %}
+    }
+{% endif %}
+}
+{% endif %}
+
+{% if routing_instances is defined %}
+routing-instances {
+{% for routing_instance in routing_instances %}
+    EVPN_{{ routing_instance.id }} {
+        description "{{ routing_instance.description }}";
+        instance-type {{ routing_instance.type }};
+{% for interface in routing_instance.interfaces %}
+        interface {{ interface }};
+{% endfor %}
+        route-distinguisher {{ host.ip_loopback }}:{{ routing_instance.id }};
+        vrf-target target:{{ bgp_asn }}:{{ routing_instance.id }};
+        protocols {
+            evpn {
+                extended-vlan-list {{ routing_instance.extended_vlan_list }};
+{% if routing_instance.default_gateway %}
+                default-gateway {{ routing_instance.default_gateway }};
+{% endif %}
+            }
+        }
+{% if routing_instance.bridge_domains is defined %}
+        bridge-domains {
+{% for bridge_domain in routing_instance.bridge_domains %}
+            {{ bridge_domain.name }} {
+                vlan-id {{ bridge_domain.vlan_id }};
+{% if bridge_domain.routing_interface is defined %}
+                routing-interface {{ bridge_domain.routing_interface }};
+{% endif %}
+            }
+{% endfor %}
+        }
+{% endif %}
+    }
+{% endfor %}
+}
+{% endif %}

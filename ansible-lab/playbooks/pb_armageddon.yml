@@ -1,0 +1,26 @@
+---
+- name: destroy configuration
+  hosts: p,pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  tasks:
+    - name: removing all configurations (but not the management interface)
+      junos_config:
+        lines:
+          - "delete interfaces ge-0/0/0"
+          - "delete interfaces ge-0/0/1"
+          - "delete interfaces ge-0/0/2"
+          - "delete interfaces ge-0/0/3"
+          - "delete interfaces irb"
+          - "delete interfaces lo0"
+          - "delete protocols"
+          - "delete policy-options"
+          - "delete routing-instances"
+        comment: "Configuration removal by Ansible"
+        provider: "{{ credentials }}"

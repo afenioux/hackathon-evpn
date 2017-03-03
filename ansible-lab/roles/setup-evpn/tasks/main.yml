@@ -1,0 +1,17 @@
+---
+
+- name: generating evpn routing instances configuration
+  template:
+    src: evpn.j2
+    dest: "/tmp/render/config_evpn_{{ inventory_hostname }}.conf"
+  tags:
+    - templating
+
+- name: pushing evpn routing instances configuration
+  junos_config:
+    src: "/tmp/render/config_evpn_{{ inventory_hostname }}.conf"
+    src_format: text
+    comment: EVPN routing instances configuration by Ansible
+    provider: "{{ credentials }}"
+  tags:
+    - templating

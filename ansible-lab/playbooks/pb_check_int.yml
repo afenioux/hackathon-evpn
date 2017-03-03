@@ -1,0 +1,28 @@
+---
+- name: checks
+  hosts: p,pe
+  connection: local
+  gather_facts: no
+  vars:
+    credentials:
+      host: "{{ ansible_host }}"
+      port: "{{ netconf_port }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_pass }}"
+  roles:
+    - Juniper.junos
+  tasks:
+##################################################################
+## Check if all physical interfaces that are part of the Underlay are UP
+##################################################################
+    - name: "Check Physical Interface Status (core/junos_command)"
+      junos_command:
+        commands:
+          - "show interfaces terse {{ item.name }}"
+        provider: "{{ credentials }}"
+        waitfor:
+          - "result[0]['interface-information']['physical-interface']['oper-status'] eq up"
+      with_items: "{{ interfaces_BB }}"
+      register: ints
+
+

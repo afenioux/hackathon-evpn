@@ -1,0 +1,27 @@
+---
+- name: generating backbone configuration
+  template:
+    src: backbone.j2
+    dest: "/tmp/render/junos_routing_base_config_{{ inventory_hostname }}.conf"
+  tags:
+    - templating
+
+#- name: removing old configuration
+#  junos_config:
+#    lines:
+#      - "delete interfaces lo0"
+#      - "delete protocols bgp"
+#      - "delete protocols ldp"
+#    comment: "Removing old configuration by Ansible"
+#    provider: "{{ credentials }}"
+#  tags:
+#    - removal
+
+- name: pushing backbone configuration
+  junos_config:
+    src: "/tmp/render/junos_routing_base_config_{{ inventory_hostname }}.conf"
+    src_format: text
+    comment: "Interfaces, ISIS, MPLS configured by Ansible"
+    provider: "{{ credentials }}"
+  tags:
+    - rollout

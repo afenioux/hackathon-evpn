@@ -1,0 +1,17 @@
+---
+
+- name: generating base configuration
+  template:
+    src: common.j2
+    dest: "/tmp/render/config_{{ inventory_hostname }}.conf"
+  tags:
+    - templating
+
+- name: pushing base configuration
+  junos_config:
+    src: "/tmp/render/config_{{ inventory_hostname }}.conf"
+    src_format: text
+    comment: Post-install by Ansible
+    provider: "{{ credentials }}"
+  tags:
+    - rollout

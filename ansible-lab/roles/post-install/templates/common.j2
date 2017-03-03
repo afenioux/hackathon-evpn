@@ -1,0 +1,44 @@
+system {
+    host-name {{ hostname }};
+    time-zone {{ time_zone }};
+    root-authentication {
+        encrypted-password "{{ root_password }}";
+    }
+    name-server {
+{% for name_server in name_servers %}
+        {{ name_server }};
+{% endfor %}
+    }
+    login {
+        message "\n {{ login.message }} \n\n";
+{% for user in login.users %}
+        user {{ user.name }} {
+            uid {{ user.uid }};
+            class {{ user.class }};
+            authentication {
+{% if user.authentication.encrypted_password is defined %}
+                encrypted-password "{{ user.authentication.encrypted_password }}";
+{% endif %}
+{% if user.authentication.ssh_rsa is defined %}
+                ssh-rsa "{{ user.authentication.ssh_rsa }}";
+{% endif %}
+            }
+        }
+{% endfor %}
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+    }
+}
+interfaces {
+    fxp0 {
+        unit 0 {
+            family inet {               
+                address {{ management_ip }};
+            }
+        }
+    }
+}

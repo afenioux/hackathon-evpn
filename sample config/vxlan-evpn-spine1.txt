@@ -1,0 +1,182 @@
+system {
+    host-name spine1;
+    root-authentication {
+        encrypted-password ""
+    }
+    login {
+        user administrator {
+            uid 2001;
+            class super-user;
+        }
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+}
+
+interfaces {
+    xe-0/0/0 {
+        description "to leaf2-xe-0/0/0";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.4/31;
+            }
+        }
+    }
+    xe-0/0/1 {
+        description "to leaf3-xe-0/0/0";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.8/31;
+            }
+        }
+    }    
+	xe-0/0/2 {
+        description "to leaf4-xe-0/0/0";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.2/31;
+            }
+        }
+    }    
+	xe-0/0/3 {
+        description "to leaf1-xe-0/0/3";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9000;
+                address 172.16.0.0/31;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 100.0.0.11/32;
+            }
+        }
+    }
+}
+
+routing-options {
+    router-id 100.0.0.11;
+    forwarding-table {
+        export pfe-ecmp;
+    }
+}
+
+
+protocols {
+    bgp {
+        group overlay-evpn {
+            type internal;
+            family evpn {
+                signaling;
+            }
+            local-as 65200;
+            local-address 100.0.0.11;
+            multipath;
+            neighbor 100.0.0.21;
+            neighbor 100.0.0.22;
+            neighbor 100.0.0.23;
+            neighbor 100.0.0.24;			
+            cluster 2.2.2.2;
+        }
+        bfd-liveness-detection {
+            minimum-interval 350;
+            multiplier 3;
+            session-mode automatic;
+        }
+    }
+	
+	    bgp {
+        log-updown;
+        graceful-restart;
+        group underlay-ipfabric {
+            import bgp-ipclos-in;
+            export  bgp-ipclos-out;
+            type external;
+            mtu-discovery;
+            local-as 65021;
+            bfd-liveness-detection {
+                minimum-interval 350;
+                multiplier 3;
+                session-mode automatic;
+            }
+            multipath multiple-as;
+            neighbor 172.16.0.5 {
+                peer-as 65012;
+            }
+            neighbor 172.16.0.9 {
+                peer-as 65013;
+            }
+            neighbor 172.16.0.1 {
+                peer-as 65011;
+            }
+            neighbor 172.16.0.13 {
+                peer-as 65014;
+            }
+        }
+}
+}
+
+	
+    evpn {
+        encapsulation vxlan;
+        extended-vni-list [  9105  9106  9107  9108  9109  9100  9101  9102  9103  9104  ];
+        multicast-mode ingress-replication;
+        vni-options {
+            vni 9105 {
+                vrf-target export target:1:9105;
+            }
+            vni 9106 {
+                vrf-target export target:1:9106;
+            }
+            vni 9107 {
+                vrf-target export target:1:9107;
+            }
+            vni 9108 {
+                vrf-target export target:1:9108;
+            }
+            vni 9109 {
+                vrf-target export target:1:9109;
+            }
+            vni 9100 {
+                vrf-target export target:1:9100;
+            }
+            vni 9101 {
+                vrf-target export target:1:9101;
+            }
+            vni 9102 {
+                vrf-target export target:1:9102;
+            }
+            vni 9103 {
+                vrf-target export target:1:9103;
+            }
+            vni 9104 {
+                vrf-target export target:1:9104;
+            }
+        }
+    }
+}

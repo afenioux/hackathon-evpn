@@ -1,0 +1,12 @@
+[ce]
+ce1 junos_host=192.168.122.42 
+ce2 junos_host=192.168.122.44
+
+[p]
+p1  junos_host=192.168.122.30
+
+[pe]
+pe1 junos_host=192.168.122.32
+pe2 junos_host=192.168.122.34 
+pe3 junos_host=192.168.122.38 
+pe4 junos_host=192.168.122.40

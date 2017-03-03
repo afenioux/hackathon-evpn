@@ -1,0 +1,182 @@
+system {
+    host-name P1;
+    root-authentication {
+        encrypted-password ""
+    }
+    login {
+        user administrator {
+            uid 2001;
+            class super-user;
+            }
+        }
+    }
+    services {
+        ssh;
+        netconf {
+            ssh;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description to-PE1-ge-0/0/0;
+        unit 0 {
+            family inet {
+                address 10.0.0.9/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/1 {
+        description to-PE2-ge-0/0/0;
+        unit 0 {
+            family inet {
+                address 10.0.0.11/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/2 {
+        description to-PE3-ge-0/0/0;
+        unit 0 {
+            family inet {
+                address 10.0.0.13/31;
+            }
+            family mpls;
+        }
+    }
+    ge-0/0/3 {
+        description to-PE4-ge-0/0/0;
+        unit 0 {
+            family inet {
+                address 10.0.0.15/31;
+            }
+            family mpls;
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 192.168.122.30/24;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 1.1.1.10/32;
+            }
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 192.168.122.1;
+    }
+    router-id 1.1.1.10;
+    autonomous-system 65000;
+    forwarding-table {
+        export lb;
+    }
+}
+protocols {
+    rsvp {
+        interface ge-0/0/2.0;
+        interface ge-0/0/0.0;
+        interface ge-0/0/1.0;
+        interface ge-0/0/3.0;
+    }
+    mpls {
+        interface ge-0/0/3.0;
+        interface ge-0/0/2.0;
+        interface ge-0/0/0.0;
+        interface ge-0/0/1.0;
+    }
+    bgp {
+        group internal {
+            type internal;
+            local-address 1.1.1.10;
+            family inet-vpn {
+                any;
+            }
+            family evpn {
+                signaling;
+            }
+            cluster 1.1.1.10;
+            multipath;
+            neighbor 1.1.1.1 {
+                inactive: bfd-liveness-detection {
+                    minimum-interval 1000;
+                    multiplier 3;
+                }
+            }
+            neighbor 1.1.1.2 {
+                inactive: bfd-liveness-detection {
+                    minimum-interval 1000;
+                    multiplier 3;
+                }
+            }
+            neighbor 1.1.1.3 {
+                inactive: bfd-liveness-detection {
+                    minimum-interval 1000;
+                    multiplier 3;
+                }
+            }
+            neighbor 1.1.1.4 {
+                inactive: bfd-liveness-detection {
+                    minimum-interval 1000;
+                    multiplier 3;
+                }
+            }
+        }
+    }
+    ospf {
+        traffic-engineering;
+        area 0.0.0.0 {
+            interface lo0.0 {
+                passive;
+            }
+            interface ge-0/0/2.0 {
+                interface-type p2p;
+            }
+            interface ge-0/0/0.0 {
+                interface-type p2p;
+            }
+            interface ge-0/0/1.0 {
+                interface-type p2p;
+            }
+            interface ge-0/0/3.0 {
+                interface-type p2p;
+            }
+        }
+    }
+    ldp {
+        interface ge-0/0/0.0;
+        interface ge-0/0/1.0;
+        interface ge-0/0/2.0;
+        interface ge-0/0/3.0;
+        interface lo0.0;
+    }
+    lldp {
+        interface all;
+    }
+}
+policy-options {
+    policy-statement lb {
+        then {
+            load-balance per-packet;
+        }
+    }
+}

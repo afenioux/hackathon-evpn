@@ -1,0 +1,17 @@
+---
+
+- name: generating BGP global settings and inet sessions
+  template:
+    src: bgp.j2
+    dest: "/tmp/render/config_bgp_{{ inventory_hostname }}.conf"
+  tags:
+    - templating
+
+- name: pushing BGP global settings and inet sessions
+  junos_config:
+    src: "/tmp/render/config_bgp_{{ inventory_hostname }}.conf"
+    src_format: text
+    comment: Ansible generated configuration
+    provider: "{{ credentials }}"
+  tags:
+    - templating

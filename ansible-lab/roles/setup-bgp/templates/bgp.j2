@@ -1,0 +1,44 @@
+routing-options { 
+	router-id {{ host.ip_loopback }};
+	autonomous-system {{ bgp_asn }};
+}
+
+protocols {
+    bgp {
+{% if bgp.neighbors is defined and bgp.neighbors|length > 0 %}
+        group evpn {
+            type internal;
+            family inet {
+		unicast;
+            }
+            family evpn {
+                signaling;
+            }
+            local-as {{ bgp_asn }};
+            local-address {{ host.ip_loopback }};
+            multipath;
+{% for neighbor in bgp.neighbors %}
+            neighbor {{ neighbor }};
+{% endfor %}
+	}
+{% endif %}
+{% if bgp is defined and bgp.local is defined %}
+        group evpn-rr {
+            type internal;
+            family inet {
+		unicast;
+            }
+            family evpn {
+                signaling;
+            }
+            local-as {{ bgp_asn }};
+            local-address {{ host.ip_loopback }};
+            cluster {{ bgp.local.cluster }};
+            multipath;
+{% for rr_client in bgp.rr_bgp %}
+            neighbor {{ rr_client }};
+{% endfor %}
+        }
+{% endif %}
+    }
+}
