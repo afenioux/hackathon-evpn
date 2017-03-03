@@ -1,17 +1,18 @@
 # Hackathon Juniper Automation
 
- Theses ansibles playbooks will provision a network with ISIS/MPLS and EVPN
- 
-
+ Theses ansible playbooks will provision a network with ISIS/MPLS and EVPN
  
  ```
 "ansible-playbook pb_armageddon.yml" : remove all the configuration from the routers
 "ansible-playbook playbooks/pb_deploy.yml" : configure all the setup
 "ansible-playbook playbooks/pb_checkall.yml" : check interface status, ISIS adjacency, BGP sessions states and routes.
  ```
+Whole presentation of the hackathon :
+* ansible-lab/slides.pdf
 
 ---
-Network topology
+##Network topology
+image : ansible-lab/topology.png
  ```
 addressing :
 192.168.1.0/24  Backbone
@@ -37,9 +38,6 @@ PE4        10.2.4.1
 * list of modules Junos by Juniper http://junos-ansible-modules.readthedocs.io/en/1.4.0/
 
 ### Installation
-on the serveur ansible :
-
-#### Tuning ansible :
 ```
 administrator@server-2:~$ grep export .profile
 export PYTHONSTARTUP=/home/administrator/.pythonrc
@@ -99,8 +97,6 @@ make a dry run of playbook and show difference without commiting
 
 run task with only the specific tag and show difference (if any)
 ```ansible-playbook pb_deploy.yml --diff --tags "templating"```
-
-
 
 
 - - - 
