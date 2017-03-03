@@ -1,0 +1,15 @@
+---
+ethernet_lag_count: 1
+
+bridge_domains:
+  - name: vlan100
+    vlan_id: 100
+  - name: vlan200
+    vlan_id: 200
+  - name: vlan201
+    vlan_id: 201
+
+routing_optons:
+  static_route:
+    route: 0.0.0.0/0
+    next_hop: 192.168.122.1

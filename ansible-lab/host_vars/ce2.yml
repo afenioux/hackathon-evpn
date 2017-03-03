@@ -1,3 +1,24 @@
 ---
 hostname: team2-ce2
 management_ip: 192.168.122.44/24
+
+interfaces:
+  - name: ge-0/0/0
+    description: to-PE2-ge-0/0/3
+    gigether-options: 802.3ad ae0
+  - name: ge-0/0/1
+    description: to-PE3-ge-0/0/3
+    gigether-options: 802.3ad ae0
+  - name: ge-0/0/2
+    description: to-server2-eth1
+    family:
+      type: bridge
+      interface_mode: trunk
+      vlan_id_list: "[ 200 100 201 ]"
+  - name: ae0
+    description: LAG
+    vlan_tagging_type: flexible-vlan-tagging
+    family:
+      type: bridge
+      interface_mode: trunk
+      vlan_id_list: "[ 200 100 201 ]"
