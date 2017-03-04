@@ -12,7 +12,8 @@ Whole presentation of the hackathon :
 
 ---
 ##Network topology
-image : ansible-lab/topology.png
+![Topology](ansible-lab/topology.png)
+
  ```
 addressing :
 192.168.1.0/24  Backbone
