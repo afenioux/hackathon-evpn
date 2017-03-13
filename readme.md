@@ -110,3 +110,17 @@ run task with only the specific tag and show difference (if any)
 
 ##Installation
 ```pip install junos-eznc```
+
+##Usage
+
+you will find some scripts in  :
+* PyEZ/
+
+ ```
+cli_run.py : used to run a command on equipement listed in sw_list.yml
+deploy.py : used deploy the junos.conf configuration on equipement listed in sw_list.yml
+junos.conf : the configuration to deploy (in "display set" format)
+sw_list.yml : list of equipement to configure
+
+ ```
+
