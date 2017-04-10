@@ -80,23 +80,23 @@ cd ansible-lab/roles
 ansible-galaxy init $ROLE
 ```
 
-###Execution
-regular execution
+### Execution
+regular execution : 
 ```ansible-playbook playbook.yml```
 
-run a playbook with arguments :
+run a playbook with arguments : 
 ```ansible-playbook playbook.yml -e "arg1=foo port=['80']```
 
-list of available variables :
+list of available variables : 
 ```ansible -m setup hostname/group```
 
-Run a command on all hosts (can be set to a group) :
+Run a command on all hosts (can be set to a group) : 
 ```ansible all -a "/bin/echo hello"```
 
-make a dry run of playbook and show difference without commiting
+make a dry run of playbook and show difference without commiting : 
 ```ansible-playbook pb_deploy.yml --diff --check```
 
-run task with only the specific tag and show difference (if any)
+run task with only the specific tag and show difference (if any) : 
 ```ansible-playbook pb_deploy.yml --diff --tags "templating"```
 
 
