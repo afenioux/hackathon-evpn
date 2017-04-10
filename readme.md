@@ -11,7 +11,7 @@ Whole presentation of the hackathon :
 * ansible-lab/slides.pdf
 
 ---
-##Network topology
+## Network topology
 ![Topology](ansible-lab/topology.png)
 
  ```
@@ -101,17 +101,19 @@ run task with only the specific tag and show difference (if any)
 
 
 - - - 
-#Python / pyEz
+
+
+# Python / pyEz
 
 * warm-up : https://stebe.info/2016/11/introduction-junos-pyez/
 * Doc : https://github.com/Juniper/py-junos-eznc#documentation
 * Examples : https://github.com/ksator/python-training-for-network-engineers
 
 
-##Installation
+## Installation
 ```pip install junos-eznc```
 
-##Usage
+## Usage
 
 you will find some scripts in  :
 * PyEZ/
